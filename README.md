@@ -21,7 +21,7 @@ python3 -m venv venv
 - **On Windows:**
 
     ```cmd
-    venv\Scripts\activate
+    .venv\Scripts\activate
     ```
 
 ## 3. Install the Requirements
