@@ -1,27 +1,250 @@
 {% extends "layout.html" %}
+{% load static %}
+
 {% block title %}
-tweet
+Home / X
 {% endblock %}
 
 {% block content %}
-<h1 class="text-center mt-4">welcome to django</h1>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Left Sidebar -->
+        <div class="col-md-3 d-none d-md-block">
+            <div class="sticky-top pt-3">
+                <nav class="nav flex-column">
+                    <a class="nav-link text-white fs-5 fw-bold mb-3" href="{% url 'tweet_list' %}">
+                        <i class="fas fa-home me-3"></i>Home
+                    </a>
+                    <a class="nav-link text-white fs-5 mb-3" href="#">
+                        <i class="fas fa-hashtag me-3"></i>Explore
+                    </a>
+                    <a class="nav-link text-white fs-5 mb-3" href="#">
+                        <i class="fas fa-bell me-3"></i>Notifications
+                    </a>
+                    <a class="nav-link text-white fs-5 mb-3" href="#">
+                        <i class="fas fa-envelope me-3"></i>Messages
+                    </a>
+                    <a class="nav-link text-white fs-5 mb-3" href="#">
+                        <i class="fas fa-user me-3"></i>Profile
+                    </a>
+                </nav>
+                {% if user.is_authenticated %}
+                <button class="btn btn-primary rounded-pill w-100 fw-bold" onclick="window.location.href='{% url 'tweet_create' %}'">
+                    Post
+                </button>
+                {% endif %}
+            </div>
+        </div>
 
-<a class="btn btn-primary mb-4" href="{% url "tweet_create" %}">create new tweet</a>
-<div class="container row gap-3">
-    {% for tweet in tweets  %}
-        <div class="card" style="width: 18rem;">
-  {% if tweet.photo %}
-  <img src="{{tweet.photo.url}}" class="card-img-top" alt="tweet photo">
-  {% endif %}
-  <div class="card-body">
-    <h5 class="card-title">{{tweet.user.username}}</h5>
-    <p class="card-text">{{tweet.text}}</p>
-    {% if tweet.user == user %}
-    <a href="{% url "tweet_edit" tweet.id %}" class="btn btn-primary">edit</a>
-    <a href="{% url "tweet_delete" tweet.id %}" class="btn btn-danger">delete</a>
-    {% endif %}
-  </div>
+        <!-- Main Content -->
+        <div class="col-md-6">
+            <!-- Header -->
+            <div class="border-bottom border-secondary sticky-top bg-dark bg-opacity-75 backdrop-blur">
+                <div class="p-3">
+                    <h1 class="h4 text-white fw-bold mb-0">Home</h1>
+                </div>
+            </div>
+
+            <!-- Compose Tweet -->
+            {% if user.is_authenticated %}
+            <div class="border-bottom border-secondary p-3">
+                <div class="d-flex">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="bg-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <form action="{% url 'tweet_create' %}" method="get">
+                            <button type="submit" class="btn btn-link text-muted text-decoration-none p-0 border-0 w-100 text-start">
+                                What's happening?
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tweet Feed -->
+            {% for tweet in tweets %}
+            <article class="border-bottom border-secondary p-3 hover-bg-dark">
+                <div class="d-flex">
+                    <!-- Avatar -->
+                    <div class="flex-shrink-0 me-3">
+                        <div class="bg-secondary rounded-circle" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                    </div>
+
+                    <!-- Tweet Content -->
+                    <div class="flex-grow-1 min-w-0">
+                        <!-- Tweet Header -->
+                        <div class="d-flex align-items-center mb-1">
+                            <span class="text-white fw-bold me-2">{{ tweet.user.first_name|default:tweet.user.username }}</span>
+                            <span class="text-muted me-2">@{{ tweet.user.username }}</span>
+                            <span class="text-muted">·</span>
+                            <span class="text-muted ms-2">{{ tweet.created_at|timesince }}</span>
+                            {% if tweet.user == user %}
+                            <div class="dropdown ms-auto">
+                                <button class="btn btn-link text-muted p-1" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-dark">
+                                    <li><a class="dropdown-item" href="{% url 'tweet_edit' tweet.id %}">Edit</a></li>
+                                    <li><a class="dropdown-item text-danger" href="{% url 'tweet_delete' tweet.id %}">Delete</a></li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Tweet Text -->
+                        <div class="text-white mb-2">
+                            {{ tweet.text }}
+                        </div>
+
+                        <!-- Tweet Image -->
+                        {% if tweet.photo %}
+                        <div class="mb-3">
+                            <img src="{{ tweet.photo.url }}" class="img-fluid rounded-3" style="max-height: 400px; width: 100%; object-fit: cover;" alt="Tweet image">
+                        </div>
+                        {% endif %}
+
+                        <!-- Tweet Actions -->
+                        <div class="d-flex justify-content-between text-muted mt-3" style="max-width: 425px;">
+                            <!-- Reply -->
+                            <button class="btn btn-link text-muted p-0 d-flex align-items-center hover-primary">
+                                <div class="rounded-circle p-2 hover-bg-primary-subtle">
+                                    <i class="far fa-comment"></i>
+                                </div>
+                                <span class="ms-1 small">0</span>
+                            </button>
+
+                            <!-- Retweet -->
+                            <button class="btn btn-link text-muted p-0 d-flex align-items-center hover-success">
+                                <div class="rounded-circle p-2 hover-bg-success-subtle">
+                                    <i class="fas fa-retweet"></i>
+                                </div>
+                                <span class="ms-1 small">0</span>
+                            </button>
+
+                            <!-- Like -->
+                            <button class="btn btn-link text-muted p-0 d-flex align-items-center hover-danger" onclick="toggleLike({{ tweet.id }})">
+                                <div class="rounded-circle p-2 hover-bg-danger-subtle">
+                                    <i class="far fa-heart" id="heart-{{ tweet.id }}"></i>
+                                </div>
+                                <span class="ms-1 small" id="like-count-{{ tweet.id }}">0</span>
+                            </button>
+
+                            <!-- Share -->
+                            <button class="btn btn-link text-muted p-0 d-flex align-items-center">
+                                <div class="rounded-circle p-2 hover-bg-primary-subtle">
+                                    <i class="fas fa-share"></i>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <div class="text-center p-5">
+                <h4 class="text-muted">No tweets yet</h4>
+                <p class="text-muted">Be the first to share what's happening!</p>
+                {% if user.is_authenticated %}
+                <a href="{% url 'tweet_create' %}" class="btn btn-primary rounded-pill">Create your first tweet</a>
+                {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary rounded-pill">Sign up to get started</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-md-3 d-none d-lg-block">
+            <div class="sticky-top pt-3">
+                <!-- What's happening -->
+                <div class="bg-dark bg-opacity-50 rounded-3 p-3 mb-3">
+                    <h5 class="text-white fw-bold mb-3">What's happening</h5>
+                    <div class="mb-2">
+                        <div class="text-muted small">Trending in Technology</div>
+                        <div class="text-white fw-bold">#Django</div>
+                        <div class="text-muted small">15.2K posts</div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="text-muted small">Trending</div>
+                        <div class="text-white fw-bold">#WebDevelopment</div>
+                        <div class="text-muted small">8,945 posts</div>
+                    </div>
+                </div>
+
+                <!-- Who to follow -->
+                <div class="bg-dark bg-opacity-50 rounded-3 p-3">
+                    <h5 class="text-white fw-bold mb-3">Who to follow</h5>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-secondary rounded-circle me-3" style="width: 32px; height: 32px;"></div>
+                        <div class="flex-grow-1">
+                            <div class="text-white fw-bold small">Django Community</div>
+                            <div class="text-muted small">@djangoproject</div>
+                        </div>
+                        <button class="btn btn-outline-light btn-sm rounded-pill">Follow</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-    {% endfor %}
-</div>
+
+<style>
+.hover-bg-dark:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.hover-primary:hover .rounded-circle {
+    background-color: rgba(29, 155, 240, 0.1) !important;
+}
+
+.hover-primary:hover i {
+    color: #1d9bf0 !important;
+}
+
+.hover-success:hover .rounded-circle {
+    background-color: rgba(0, 186, 124, 0.1) !important;
+}
+
+.hover-success:hover i {
+    color: #00ba7c !important;
+}
+
+.hover-danger:hover .rounded-circle {
+    background-color: rgba(249, 24, 128, 0.1) !important;
+}
+
+.hover-danger:hover i {
+    color: #f91880 !important;
+}
+
+.backdrop-blur {
+    backdrop-filter: blur(12px);
+}
+</style>
+
+<script>
+function toggleLike(tweetId) {
+    // This would be connected to your like/unlike endpoint
+    const heart = document.getElementById(`heart-${tweetId}`);
+    const count = document.getElementById(`like-count-${tweetId}`);
+    
+    // Toggle heart icon
+    if (heart.classList.contains('far')) {
+        heart.classList.remove('far');
+        heart.classList.add('fas');
+        heart.style.color = '#f91880';
+        count.textContent = parseInt(count.textContent) + 1;
+    } else {
+        heart.classList.remove('fas');
+        heart.classList.add('far');
+        heart.style.color = '';
+        count.textContent = parseInt(count.textContent) - 1;
+    }
+}
+</script>
 {% endblock %}
