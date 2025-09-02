@@ -29,7 +29,7 @@ python3 -m venv venv
 After activating the virtual environment, install the required dependencies:
 
 ```bash
-cd repoName
+cd <repoName>
 pip install -r requirements.txt
 ```
 
