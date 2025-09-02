@@ -1,6 +1,6 @@
 # Project Setup Guide
 
-This guide will help you set up a Python virtual environment, activate it, and install the required dependencies using `requirements.txt`.
+This guide will help you set up a Python virtual environment, activate it, install the required dependencies using `requirements.txt`, and run your development server.
 
 ## 1. Create a Virtual Environment
 
@@ -21,7 +21,7 @@ python3 -m venv venv
 - **On Windows:**
 
     ```cmd
-    .venv\Scripts\activate
+    .\venv\Scripts\activate
     ```
 
 ## 3. Install the Requirements
@@ -32,7 +32,25 @@ After activating the virtual environment, install the required dependencies:
 pip install -r requirements.txt
 ```
 
-## 4. You're All Set!
+## 4. Run the Development Server
+
+To start your application’s development server, use the following command (commonly used for Django or Flask projects):
+
+- **For Django:**
+
+    ```bash
+    python manage.py runserver
+    ```
+
+- **For Flask:**
+
+    ```bash
+    flask run
+    ```
+
+> Replace the command above with your project's specific run command if it's different.
+
+## 5. You're All Set!
 
 Now you can run or develop your project in your isolated environment.
 
