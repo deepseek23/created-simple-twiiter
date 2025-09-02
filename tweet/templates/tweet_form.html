@@ -1,15 +1,167 @@
-{% extends "layout.html" %} 
-{% block title %} tweet {% endblock %} {% block content %}
-<h1 class="text-center mt-4">welcome to django</h1>
-<h2>
-  {% if form.instance.pk %}edit your tweet {% else %}create your tweet {% endif %}
-</h2>
+{% extends "layout.html" %}
+{% load static %}
 
-<form method="post" enctype="multipart/form-data" class="form">
-    {% csrf_token %}
+{% block title %}
+Compose / X
+{% endblock %}
 
-    {{form.as_p}}
-    <button class="btn btn-warning" type='submit'>create tweet</button>
-</form>
-<a href="{% url "tweet_list" %}">back to home page</a>
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <!-- Header -->
+            <div class="border-bottom border-secondary sticky-top bg-dark bg-opacity-75 backdrop-blur">
+                <div class="p-3 d-flex align-items-center">
+                    <a href="{% url 'tweet_list' %}" class="btn btn-link text-white p-0 me-3">
+                        <i class="fas fa-arrow-left"></i>
+                    </a>
+                    <h1 class="h4 text-white fw-bold mb-0">Compose Tweet</h1>
+                </div>
+            </div>
+
+            <!-- Compose Form -->
+            <div class="p-4">
+                <form method="post" enctype="multipart/form-data" class="tweet-compose-form">
+                    {% csrf_token %}
+                    
+                    <div class="d-flex">
+                        <!-- Avatar -->
+                        <div class="flex-shrink-0 me-3">
+                            <div class="bg-secondary rounded-circle" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                        </div>
+
+                        <!-- Compose Area -->
+                        <div class="flex-grow-1">
+                            <!-- Text Area -->
+                            <div class="mb-3">
+                                <textarea 
+                                    name="text" 
+                                    class="form-control bg-transparent border-0 text-white fs-5 p-0" 
+                                    placeholder="What's happening?" 
+                                    rows="4" 
+                                    style="resize: none; box-shadow: none;"
+                                    maxlength="300"
+                                    id="tweet-text"
+                                    required>{{ form.text.value|default:'' }}</textarea>
+                                <div class="text-end mt-2">
+                                    <small class="text-muted">
+                                        <span id="char-count">0</span>/300
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div class="mb-3">
+                                <input type="file" name="photo" class="form-control bg-transparent border-0 text-white" accept="image/*" id="photo-input">
+                                <div id="image-preview" class="mt-2"></div>
+                            </div>
+
+                            <!-- Tweet Options -->
+                            <div class="d-flex align-items-center justify-content-between border-top border-secondary pt-3">
+                                <div class="d-flex align-items-center">
+                                    <label for="photo-input" class="btn btn-link text-primary p-2 me-2" title="Add photo">
+                                        <i class="far fa-image"></i>
+                                    </label>
+                                    <button type="button" class="btn btn-link text-primary p-2 me-2" title="Add GIF">
+                                        <i class="fas fa-film"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-link text-primary p-2 me-2" title="Add poll">
+                                        <i class="fas fa-poll"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-link text-primary p-2" title="Add emoji">
+                                        <i class="far fa-smile"></i>
+                                    </button>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" id="tweet-btn" disabled>
+                                    Post
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control:focus {
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.tweet-compose-form textarea::placeholder {
+    color: #71767b;
+    font-size: 1.25rem;
+}
+
+.backdrop-blur {
+    backdrop-filter: blur(12px);
+}
+
+#image-preview img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 16px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const textArea = document.getElementById('tweet-text');
+    const charCount = document.getElementById('char-count');
+    const tweetBtn = document.getElementById('tweet-btn');
+    const photoInput = document.getElementById('photo-input');
+    const imagePreview = document.getElementById('image-preview');
+
+    // Character counter and tweet button enable/disable
+    function updateTweetButton() {
+        const textLength = textArea.value.length;
+        charCount.textContent = textLength;
+        
+        if (textLength > 300) {
+            charCount.classList.add('text-danger');
+            tweetBtn.disabled = true;
+        } else if (textLength > 0) {
+            charCount.classList.remove('text-danger');
+            tweetBtn.disabled = false;
+        } else {
+            charCount.classList.remove('text-danger');
+            tweetBtn.disabled = true;
+        }
+    }
+
+    textArea.addEventListener('input', updateTweetButton);
+    
+    // Initial check
+    updateTweetButton();
+
+    // Image preview
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `
+                    <div class="position-relative d-inline-block">
+                        <img src="${e.target.result}" class="img-fluid rounded-3" style="max-height: 300px;">
+                        <button type="button" class="btn btn-dark btn-sm rounded-circle position-absolute top-0 end-0 m-2" onclick="removeImage()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+
+function removeImage() {
+    document.getElementById('photo-input').value = '';
+    document.getElementById('image-preview').innerHTML = '';
+}
+</script>
 {% endblock %}
