@@ -42,14 +42,6 @@ To start your application’s development server, use the following command (com
     python manage.py runserver
     ```
 
-- **For Flask:**
-
-    ```bash
-    flask run
-    ```
-
-> Replace the command above with your project's specific run command if it's different.
-
 ## 5. You're All Set!
 
 Now you can run or develop your project in your isolated environment.
